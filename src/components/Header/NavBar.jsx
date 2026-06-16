@@ -67,9 +67,6 @@ function NavBar() {
                 2
               </span>
             </div>
-            {/* <Link to="/signin">
-              <User className="cursor-pointer hover:text-white transition" />
-            </Link> */}
             <UserMenu />
           </div>
 

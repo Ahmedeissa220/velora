@@ -1,4 +1,4 @@
-import React from "react";
+
 import unnamed from "../../assets/unnamed.png";
 
 function Hero() {

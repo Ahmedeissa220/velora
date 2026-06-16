@@ -1,6 +1,6 @@
 import Unnamed from "../assets/unnamed (11).png";
 import { useState } from "react";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -21,8 +21,7 @@ function SignIn() {
   const handlePasswordChange = (e) => {
     setFormData({ ...formData, password: e.target.value });
   };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
@@ -48,11 +47,36 @@ function SignIn() {
       return;
     }
 
-    // Success
-    setErrors({});
-    setSuccess("Successfully signed in!");
+    try {
+      // Firebase Login
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password,
+      );
 
-    // console.log(formData);
+      const user = userCredential.user;
+
+      // ✅ Save User in LocalStorage
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+        }),
+      );
+
+      setErrors({});
+      setSuccess("Successfully signed in!");
+
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+
+      setErrors({
+        firebase: "Invalid email or password",
+      });
+    }
   };
 
   const navigate = useNavigate();
@@ -60,13 +84,24 @@ function SignIn() {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      console.log(result.user);
-      navigate("/"); // بعد التسجيل يروح للهوم
+
+      const user = result.user;
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          photo: user.photoURL,
+        }),
+      );
+
+      navigate("/dashboard");
     } catch (error) {
       console.log(error);
     }
   };
-
   return (
     <div className="bg-[#141313] text-white min-h-screen selection:bg-blue-500 selection:text-white relative overflow-hidden">
       <main className="relative z-10 min-h-screen flex items-center justify-center px-6 py-12">
@@ -200,6 +235,13 @@ function SignIn() {
                 Continue with Google
               </button>
             </div>
+            {/* Sign Up Link */}
+            <p className="text-center text-sm text-slate-400 mt-6">
+              Don&apos;t have an account?{" "}
+              <Link to="/signup" className="text-white font-semibold hover:text-blue-400 transition-colors">
+                Create one
+              </Link>
+            </p>
           </div>
         </div>
       </main>

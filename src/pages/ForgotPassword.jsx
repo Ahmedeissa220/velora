@@ -31,7 +31,7 @@ function ForgotPassword() {
       setTimeout(() => {
         navigate("/reset-password");
       }, 1500);
-    } catch (error) {
+    } catch {
       setError("Something went wrong");
     } finally {
       setLoading(false);

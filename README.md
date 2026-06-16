@@ -59,7 +59,7 @@ The project focuses on:
 
 | Products | Wishlist | Cart |
 |----------|----------|------|
-| ![1](https://via.placeholder.com/400x250?text=Products) | ![2](https://via.placeholder.com/400x250?text=Wishlist) | ![3](https://via.placeholder.com/400x250?text=Cart) |
+| ![1](https://velora-nine-blond.vercel.app/) | ![2](https://via.placeholder.com/400x250?text=Wishlist) | ![3](https://via.placeholder.com/400x250?text=Cart) |
 
 ---
 

@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { CreditCard, MapPin, Truck, Store, ShieldCheck } from "lucide-react";
-
 import { useCart } from "../../context/CartContext";
+import { useNavigate } from "react-router-dom";
+import { db } from "../../firebase";
+import { collection, addDoc } from "firebase/firestore";
+import { useAuth } from "../../context/AuthContext";
 
 const branches = [
   {
@@ -24,9 +27,46 @@ const branches = [
 export default function Checkout() {
   const [deliveryType, setDeliveryType] = useState("delivery");
   const [selectedBranch, setSelectedBranch] = useState(1);
+  const [placing, setPlacing] = useState(false);
 
-  // CART CONTEXT
-  const { cart, subtotal, shipping, total } = useCart();
+  const { cart, subtotal, shipping, total, clearCart } = useCart();
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+
+  const handlePlaceOrder = async () => {
+    setPlacing(true);
+    try {
+      const orderNumber = `ORD-${Date.now()}`;
+      const selectedBranchName = branches.find((b) => b.id === selectedBranch)?.name;
+      const orderData = {
+        orderNumber,
+        userId: currentUser?.uid || "guest",
+        items: cart.map((item) => ({
+          id: item.id,
+          title: item.title || item.name,
+          img: item.img || "",
+          price: item.price,
+          qty: item.qty || 1,
+        })),
+        subtotal,
+        shipping,
+        total,
+        deliveryType,
+        branch: selectedBranchName || null,
+        status: "Pending",
+        date: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+        createdAt: Date.now(),
+      };
+
+      await addDoc(collection(db, "orders"), orderData);
+      clearCart();
+      navigate("/order-confirmation", { state: { orderData } });
+    } catch (err) {
+      console.error("Failed to place order:", err);
+    } finally {
+      setPlacing(false);
+    }
+  };
 
   return (
     <section className="min-h-screen bg-[#f8f8f8] py-10 px-4 md:px-8">
@@ -286,8 +326,12 @@ export default function Checkout() {
             </div>
 
             {/* BUTTON */}
-            <button className="w-full bg-black text-white py-4 rounded-2xl mt-8 font-semibold hover:opacity-90 transition-all">
-              Place Order
+            <button
+              onClick={handlePlaceOrder}
+              disabled={placing || cart.length === 0}
+              className="w-full bg-black text-white py-4 rounded-2xl mt-8 font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {placing ? "Placing Order..." : "Place Order"}
             </button>
 
             <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-5">
