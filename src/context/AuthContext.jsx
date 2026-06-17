@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut, getRedirectResult } from "firebase/auth";
 import { auth } from "../firebase";
+
 
 const AuthContext = createContext(null);
 
@@ -11,6 +12,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+
       if (user) {
         localStorage.setItem(
           "user",
@@ -24,8 +26,30 @@ export function AuthProvider({ children }) {
       } else {
         localStorage.removeItem("user");
       }
+
       setLoading(false);
     });
+
+    // ⭐ مهم جدًا مع Google redirect
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          setCurrentUser(result.user);
+
+          localStorage.setItem(
+            "user",
+            JSON.stringify({
+              uid: result.user.uid,
+              name: result.user.displayName,
+              email: result.user.email,
+              photo: result.user.photoURL,
+            })
+          );
+        }
+      })
+      .catch((error) => {
+        console.log("Redirect error:", error);
+      });
 
     return () => unsubscribe();
   }, []);
