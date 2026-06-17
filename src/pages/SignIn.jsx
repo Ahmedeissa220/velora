@@ -1,6 +1,6 @@
 import Unnamed from "../assets/unnamed (11).png";
 import { useState } from "react";
-import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithRedirect, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -83,21 +83,7 @@ function SignIn() {
 
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-
-      const user = result.user;
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          uid: user.uid,
-          name: user.displayName,
-          email: user.email,
-          photo: user.photoURL,
-        }),
-      );
-
-      navigate("/dashboard");
+      await signInWithRedirect(auth, googleProvider);
     } catch (error) {
       console.log(error);
     }
@@ -158,11 +144,10 @@ function SignIn() {
                   value={formData.email}
                   onChange={handleEmailChange}
                   type="email"
-                  className={`w-full bg-white text-slate-900 font-semibold rounded-xl p-3 border transition focus:outline-none ${
-                    errors.email
-                      ? "border-red-500 focus:ring-2 focus:ring-red-500"
-                      : "border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  }`}
+                  className={`w-full bg-white text-slate-900 font-semibold rounded-xl p-3 border transition focus:outline-none ${errors.email
+                    ? "border-red-500 focus:ring-2 focus:ring-red-500"
+                    : "border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    }`}
                 />
 
                 {errors.email && (
@@ -190,11 +175,10 @@ function SignIn() {
                   value={formData.password}
                   onChange={handlePasswordChange}
                   type="password"
-                  className={`w-full bg-white text-slate-900 font-semibold rounded-xl p-3 border transition focus:outline-none ${
-                    errors.password
-                      ? "border-red-500 focus:ring-2 focus:ring-red-500"
-                      : "border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  }`}
+                  className={`w-full bg-white text-slate-900 font-semibold rounded-xl p-3 border transition focus:outline-none ${errors.password
+                    ? "border-red-500 focus:ring-2 focus:ring-red-500"
+                    : "border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    }`}
                 />
 
                 {errors.password && (
